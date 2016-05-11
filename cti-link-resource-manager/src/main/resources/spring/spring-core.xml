@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- 读取属性文件 -->
+    <bean id="propertyConfigurer" class="com.tinet.ctilink.util.PropertyUtil">
+        <property name="locations">
+            <list>
+                <value>classpath*:app.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- 定义Redis连接池 -->
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxTotal" value="20" />
+        <property name="maxIdle" value="20" />
+        <property name="minIdle" value="5" />
+    </bean>
+
+    <!-- 定义Spring Redis连接工厂 -->
+    <bean id="redisConnectionFactory" class="com.tinet.ctilink.jedis.CtiLinkJedisConnectionFactory">
+        <property name="hostName" value="${redis.url}" />
+        <property name="port" value="${redis.port}" />
+        <property name="database" value="0" />
+        <property name="usePool" value="true" />
+        <property name="poolConfig" ref="jedisPoolConfig" />
+    </bean>
+
+    <bean id="redisTemplate" class="com.tinet.ctilink.cache.RedisTemplate">
+        <property name="connectionFactory" ref="redisConnectionFactory" />
+    </bean>
+
+    <bean id="redisService" class="com.tinet.ctilink.cache.RedisService" />
+
+    <!-- 注入Spring上下文 -->
+    <bean id="contextUtil" class="com.tinet.ctilink.util.ContextUtil" />
+
+    <!-- 定义数据库连接池 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+          init-method="init" destroy-method="close">
+        <!-- 基本属性 -->
+        <property name="url" value="${db.url}" />
+        <property name="username" value="${db.username}" />
+        <property name="password" value="${db.password}" />
+
+        <!-- 配置连接池的初始化大小、最小值、最大值 -->
+        <property name="initialSize" value="${db.initialSize.conf}" />
+        <property name="minIdle" value="${db.minIdle.conf}" />
+        <property name="maxActive" value="${db.maxActive.conf}" />
+
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="60000" />
+
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="300000" />
+
+        <!-- 配置连接检测的策略，在连接空闲时检测 -->
+        <property name="validationQuery" value="SELECT 'x'" />
+        <property name="testWhileIdle" value="true" />
+        <property name="testOnBorrow" value="false" />
+        <property name="testOnReturn" value="false" />
+
+        <!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+        <property name="poolPreparedStatements" value="true" />
+        <property name="maxOpenPreparedStatements" value="100" />
+        <property name="maxPoolPreparedStatementPerConnectionSize"
+                  value="20" />
+
+        <!-- 配置监控统计拦截的filter -->
+        <property name="filters" value="stat" />
+
+        <!-- 连接泄漏监测，怀疑存在泄漏时打开 -->
+        <property name="removeAbandoned" value="true" />
+        <property name="removeAbandonedTimeout" value="1800" />
+        <property name="logAbandoned" value="true" />
+    </bean>
+
+    <!-- 定义MyBatis -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="mapperLocations">
+            <array>
+                <value>classpath*:mybatis/*Mapper.xml</value>
+            </array>
+        </property>
+        <property name="typeAliasesPackage" value="com.tinet.ctilink.model" />
+        <property name="plugins">
+            <array>
+                <bean class="com.github.pagehelper.PageHelper" />
+            </array>
+        </property>
+        <property name="configurationProperties">
+            <props>
+                <prop key="cacheEnabled">false</prop>
+                <prop key="lazyLoadingEnabled">false</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean class="tk.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.tinet.ctilink.conf.mapper" />
+        <property name="markerInterface" value="com.tinet.ctilink.mapper.BaseMapper" />
+        <property name="properties">
+            <value>
+                mappers=com.tinet.ctilink.mapper.BaseMapper
+            </value>
+        </property>
+    </bean>
+
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" ref="sqlSessionFactory" />
+    </bean>
+
+    <!-- 配置事务管理器 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <!-- 声明式事务 以AspectJ方式 定义事物AOP -->
+    <aop:config>
+        <aop:advisor pointcut="execution(* com.tinet.ctilink.rm..*Service.*(..))" advice-ref="txAdvice"/>
+    </aop:config>
+
+    <!-- 基本事务定义, 使用transactionManager作事务管理 -->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="get*" read-only="true" propagation="SUPPORTS"/>
+            <tx:method name="list*" read-only="true" propagation="SUPPORTS"/>
+            <tx:method name="create*"/>
+            <tx:method name="update*"/>
+            <tx:method name="delete*"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!-- JMX监控输出 -->
+    <context:mbean-export />
+    <bean id="dubboMonitor" class="com.tinet.ctilink.monitor.DubboMonitor" />
+    <bean id="druidMonitor" class="com.tinet.ctilink.monitor.DruidMonitor" />
+    <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+        <property name="beans">
+            <map>
+                <entry key="Ctilink:type=DubboMonitor,app=resource-manager" value-ref="dubboMonitor" />
+                <entry key="Ctilink:type=DruidMonitor,app=resource-manager" value-ref="druidMonitor" />
+            </map>
+        </property>
+    </bean>
+
+</beans>
