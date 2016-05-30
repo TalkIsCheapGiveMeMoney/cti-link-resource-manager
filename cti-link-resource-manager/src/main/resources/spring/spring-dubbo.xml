@@ -8,7 +8,7 @@
     <!-- Dubbo全局配置 -->
     <dubbo:application name="cti-link-resource-manager" version="${application.version}" />
     <dubbo:registry address="${dubbo.registry.address}" />
-    <dubbo:provider filter="provider" timeout="10000" retries="0" version="${application.version}" />
+    <dubbo:provider timeout="10000" retries="0" version="${application.version}" />
     <dubbo:consumer check="true" version="${application.version}" />
     <dubbo:protocol name="dubbo" port="${dubbo.protocol.port}" />
     <dubbo:protocol name="rest" server="tomcat" port="${dubbo.rest.port}" accepts="${dubbo.rest.accepts}" threads="${dubbo.rest.threads}" />
