@@ -45,11 +45,4 @@
 		<appender-ref ref="LOGSTASH" />
 	</root>
 
-	<!-- Hibernate调试 -->
-	<!-- <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" />
-	<logger name="org.hibernate.type.descriptor.sql.BasicExtractor" level="DEBUG" />
-	<logger name="org.hibernate.SQL" level="DEBUG" />
-	<logger name="org.hibernate.engine.QueryParameters" level="DEBUG" />
-	<logger name="org.hibernate.engine.query.HQLQueryPlan" level="DEBUG" /> -->
-
 </configuration>
