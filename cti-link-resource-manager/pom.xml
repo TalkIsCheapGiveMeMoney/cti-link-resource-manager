@@ -10,14 +10,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>cti-link-resource-manager</artifactId>
-
-    <properties>
-        <jvm.xms>256m</jvm.xms>
-        <jvm.xmx>2048m</jvm.xmx>
-        <jvm.jmx.port>60005</jvm.jmx.port>
-    </properties>
+    <packaging>war</packaging>
 
     <dependencies>
+        <dependency>
+            <groupId>com.tinet.ctilink</groupId>
+            <artifactId>cti-link-resource-manager-api</artifactId>
+            <version>0.0.1</version>
+        </dependency>
         <dependency>
             <groupId>com.tinet.ctilink</groupId>
             <artifactId>cti-link-core</artifactId>
@@ -140,97 +140,5 @@
             <artifactId>jcl-over-slf4j</artifactId>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>appassembler-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>generate-jsw-scripts</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>generate-daemons</goal>
-                            <goal>create-repository</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <repositoryLayout>flat</repositoryLayout>
-                    <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
-                    <daemons>
-                        <daemon>
-                            <id>cti-link</id>
-                            <mainClass>com.tinet.ctilink.Application</mainClass>
-                            <platforms>
-                                <platform>jsw</platform>
-                            </platforms>
-                            <generatorConfigurations>
-                                <generatorConfiguration>
-                                    <generator>jsw</generator>
-                                    <includes>
-                                        <include>linux-x86-32</include>
-                                        <include>linux-x86-64</include>
-                                        <include>windows-x86-32</include>
-                                        <include>windows-x86-64</include>
-                                    </includes>
-                                    <configuration>
-                                        <property>
-                                            <name>wrapper.logfile</name>
-                                            <value>logs/wrapper.log</value>
-                                        </property>
-                                        <property>
-                                            <name>wrapper.logfile.loglevel</name>
-                                            <value>INFO</value>
-                                        </property>
-                                        <property>
-                                            <name>wrapper.logfile.maxsize</name>
-                                            <value>100m</value>
-                                        </property>
-                                        <property>
-                                            <name>wrapper.logfile.maxfiles</name>
-                                            <value>10</value>
-                                        </property>
-                                    </configuration>
-                                </generatorConfiguration>
-                            </generatorConfigurations>
-                            <jvmSettings>
-                                <extraArguments>
-                                    <extraArgument>-server</extraArgument>
-                                    <extraArgument>-Xms${jvm.xms}</extraArgument>
-                                    <extraArgument>-Xmx${jvm.xmx}</extraArgument>
-                                    <extraArgument>-Xss256k</extraArgument>
-                                    <extraArgument>-XX:NewRatio=2</extraArgument>
-                                    <extraArgument>-XX:+UseConcMarkSweepGC</extraArgument>
-                                    <extraArgument>-XX:+ExplicitGCInvokesConcurrent</extraArgument>
-                                    <extraArgument>-XX:+HeapDumpOnOutOfMemoryError</extraArgument>
-                                    <extraArgument>-XX:+PrintCommandLineFlags</extraArgument>
-                                    <extraArgument>-Dcom.sun.management.jmxremote.port=${jvm.jmx.port}</extraArgument>
-                                    <extraArgument>-Dcom.sun.management.jmxremote.ssl=false</extraArgument>
-                                    <extraArgument>-Dcom.sun.management.jmxremote.authenticate=false</extraArgument>
-                                </extraArguments>
-                            </jvmSettings>
-                        </daemon>
-                    </daemons>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <descriptor>src/main/assembly/assembly.xml</descriptor>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

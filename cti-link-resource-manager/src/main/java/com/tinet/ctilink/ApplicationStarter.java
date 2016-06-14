@@ -23,7 +23,6 @@ public class ApplicationStarter implements ApplicationListener<ContextRefreshedE
 
 	@Override
 	public void onApplicationEvent(final ContextRefreshedEvent event) {
-
 		// 设置JVM的DNS缓存时间
 		// http://docs.amazonaws.cn/AWSSdkDocsJava/latest/DeveloperGuide/java-dg-jvm-ttl.html
 		java.security.Security.setProperty("networkaddress.cache.ttl", "60");
