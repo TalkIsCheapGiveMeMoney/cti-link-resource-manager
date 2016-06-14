@@ -1,7 +1,7 @@
 package com.tinet.ctilink.resourcemanager.service.v1;
 
-import com.tinet.ctilink.resourcemanager.ApiResult;
-import com.tinet.ctilink.resourcemanager.model.PublicMoh;
+import com.tinet.ctilink.conf.ApiResult;
+import com.tinet.ctilink.conf.model.PublicMoh;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;

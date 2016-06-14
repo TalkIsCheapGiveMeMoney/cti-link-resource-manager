@@ -2,13 +2,13 @@ package com.tinet.ctilink.resourcemanager.service.imp;
 
 import com.alibaba.dubbo.config.annotation.Service;
 
+import com.tinet.ctilink.conf.ApiResult;
 import com.tinet.ctilink.inc.Const;
-import com.tinet.ctilink.resourcemanager.ApiResult;
 import com.tinet.ctilink.resourcemanager.mapper.EnterpriseIvrMapper;
 import com.tinet.ctilink.resourcemanager.mapper.PublicMohMapper;
-import com.tinet.ctilink.resourcemanager.model.EnterpriseIvr;
-import com.tinet.ctilink.resourcemanager.model.PublicMoh;
-import com.tinet.ctilink.resourcemanager.model.PublicVoice;
+import com.tinet.ctilink.conf.model.EnterpriseIvr;
+import com.tinet.ctilink.conf.model.PublicMoh;
+import com.tinet.ctilink.conf.model.PublicVoice;
 import com.tinet.ctilink.resourcemanager.service.v1.CtiLinkPublicVoiceService;
 import com.tinet.ctilink.resourcemanager.util.VoiceFile;
 import com.tinet.ctilink.service.BaseService;
@@ -47,8 +47,8 @@ public class PublicVoiceServiceImp extends BaseService<PublicVoice> implements C
     @Override
     public ApiResult<List<PublicVoice>> listPublicVoice() {
         List<PublicVoice> list = selectAll();
-        if(list == null || list.size() <= 0){
-            return new ApiResult<>(ApiResult.FAIL_RESULT,"获取公共语音列表失败");
+        if (list == null || list.size() <= 0) {
+            return new ApiResult<>(ApiResult.FAIL_RESULT, "获取公共语音列表失败");
         }
 
         return new ApiResult<>(list);
@@ -60,48 +60,48 @@ public class PublicVoiceServiceImp extends BaseService<PublicVoice> implements C
 
         String voiceName = null;
         List<InputPart> inputParts = uploadForm.get("voiceName");
-        if(inputParts != null){
+        if (inputParts != null) {
             InputPart inputPart = inputParts.get(0);
-            try{
+            try {
                 voiceName = inputPart.getBodyAsString();
-            }catch (IOException e){
+            } catch (IOException e) {
                 logger.error("PublicVoiceServiceImp.createPublicVoice error", e);
             }
         }
-        if(StringUtils.isEmpty(voiceName)){
-           return new ApiResult<>(ApiResult.FAIL_RESULT,"voiceName is error");
+        if (StringUtils.isEmpty(voiceName)) {
+            return new ApiResult<>(ApiResult.FAIL_RESULT, "voiceName is error");
         }
 
         String description = null;
         inputParts = uploadForm.get("description");
-        if (inputParts != null){
+        if (inputParts != null) {
             InputPart inputPart = inputParts.get(0);
-            try{
+            try {
                 description = inputPart.getBodyAsString();
-            }catch(IOException e){
+            } catch (IOException e) {
                 logger.error("PublicVoiceServiceImp.createPublicVoice error", e);
             }
         }
 
         inputParts = uploadForm.get("file");
         File file = null;
-        if(inputParts != null){
+        if (inputParts != null) {
             InputPart inputPart = inputParts.get(0);
-            try{
+            try {
                 MultivaluedMap<String, String> header = inputPart.getHeaders();
                 file = inputPart.getBody(File.class, null);
-            }catch (IOException e){
+            } catch (IOException e) {
                 logger.error("PublicVoiceServiceImp.createPublicVoice error", e);
             }
         }
 
-        if(file == null){
-            return new ApiResult<>(ApiResult.FAIL_RESULT,"文件参数不正确");
+        if (file == null) {
+            return new ApiResult<>(ApiResult.FAIL_RESULT, "文件参数不正确");
         }
 
         PublicVoice publicVoice = new PublicVoice();
         publicVoice.setVoiceName(voiceName);
-        if(description != null){
+        if (description != null) {
             publicVoice.setDescription(description);
         }
 
@@ -110,44 +110,44 @@ public class PublicVoiceServiceImp extends BaseService<PublicVoice> implements C
 
     @Override
     public ApiResult<PublicVoice> createPublicVoice(File file, PublicVoice publicVoice) {
-        if(StringUtils.isEmpty(publicVoice.getVoiceName())){
-            return new ApiResult<>(ApiResult.FAIL_RESULT,"参数[voiceName]不能为空");
+        if (StringUtils.isEmpty(publicVoice.getVoiceName())) {
+            return new ApiResult<>(ApiResult.FAIL_RESULT, "参数[voiceName]不能为空");
         }
         publicVoice.setVoiceName(SqlUtil.escapeSql(publicVoice.getVoiceName()));
 
         boolean success = false;
-        if(file == null){
-            if((publicVoice.getVoiceName().startsWith("[自助录音]"))){
+        if (file == null) {
+            if ((publicVoice.getVoiceName().startsWith("[自助录音]"))) {
                 success = true;
-            }else{
-                return new ApiResult<>(ApiResult.FAIL_RESULT,"参数[file]不能为空");
+            } else {
+                return new ApiResult<>(ApiResult.FAIL_RESULT, "参数[file]不能为空");
             }
-        }else{
+        } else {
             Long timestamp = new Date().getTime();
             String uploadPath = Const.SOUNDS_IVR_VOICE_ABS_PATH;
             String srcFile = timestamp + "old.mav";
             System.out.println(file.getName());
             String destFile = timestamp + ".wav";
 
-            if(VoiceFile.mkDir(uploadPath)){
+            if (VoiceFile.mkDir(uploadPath)) {
                 FileUtils.moveFile(file, srcFile, uploadPath);
-                success = VoiceFile.transferPublicVoice(srcFile,destFile);
+                success = VoiceFile.transferPublicVoice(srcFile, destFile);
             }
 
             publicVoice.setPath(destFile);
             publicVoice.setDescription(SqlUtil.escapeSql(publicVoice.getDescription()));
         }
 
-        if(success){
+        if (success) {
             int count = insertSelective(publicVoice);
-            if(count != 1){
+            if (count != 1) {
                 logger.error("PublicVoiceServiceImp.createPublicVoice error, " + publicVoice + ", count = " + count);
-                return new ApiResult<>(ApiResult.FAIL_RESULT,"新增失败");
-            }else{
+                return new ApiResult<>(ApiResult.FAIL_RESULT, "新增失败");
+            } else {
                 return new ApiResult<>(publicVoice);
             }
-        }else{
-            return new ApiResult<>(ApiResult.FAIL_RESULT,"新增失败");
+        } else {
+            return new ApiResult<>(ApiResult.FAIL_RESULT, "新增失败");
         }
     }
 
@@ -157,64 +157,64 @@ public class PublicVoiceServiceImp extends BaseService<PublicVoice> implements C
 
         int id = -1;
         List<InputPart> inputParts = uploadForm.get("id");
-        if(inputParts != null){
+        if (inputParts != null) {
             InputPart inputPart = inputParts.get(0);
-            try{
+            try {
                 id = Integer.parseInt(inputPart.getBodyAsString());
-            }catch (IOException e){
+            } catch (IOException e) {
                 logger.error("PublicVoiceServiceImp.updatePublicVoice error", e);
             }
         }
         PublicVoice publicVoice1 = selectByPrimaryKey(id);
-        if(publicVoice1 == null){
-            return new ApiResult<>(ApiResult.FAIL_RESULT,"不存在此id的公共语音");
+        if (publicVoice1 == null) {
+            return new ApiResult<>(ApiResult.FAIL_RESULT, "不存在此id的公共语音");
         }
 
         String voiceName = null;
         inputParts = uploadForm.get("voiceName");
-        if(inputParts != null){
+        if (inputParts != null) {
             InputPart inputPart = inputParts.get(0);
-            try{
+            try {
                 voiceName = inputPart.getBodyAsString();
-            }catch (IOException e){
+            } catch (IOException e) {
                 logger.error("PublicVoiceServiceImp.updatePublicVoice error", e);
             }
         }
-        if(StringUtils.isEmpty(voiceName)){
-            return new ApiResult<>(ApiResult.FAIL_RESULT,"公共语音名称不正确");
+        if (StringUtils.isEmpty(voiceName)) {
+            return new ApiResult<>(ApiResult.FAIL_RESULT, "公共语音名称不正确");
         }
 
         String description = null;
         inputParts = uploadForm.get("description");
-        if (inputParts != null){
+        if (inputParts != null) {
             InputPart inputPart = inputParts.get(0);
-            try{
+            try {
                 description = inputPart.getBodyAsString();
-            }catch(IOException e){
+            } catch (IOException e) {
                 logger.error("PublicVoiceServiceImp.updatePublicVoice error", e);
             }
         }
 
         inputParts = uploadForm.get("file");
         File file = null;
-        if(inputParts != null){
+        if (inputParts != null) {
             InputPart inputPart = inputParts.get(0);
-            try{
+            try {
                 MultivaluedMap<String, String> header = inputPart.getHeaders();
                 file = inputPart.getBody(File.class, null);
-            }catch (IOException e){
+            } catch (IOException e) {
                 logger.error("PublicVoiceServiceImp.updatePublicVoice error", e);
             }
         }
 
-        if(file == null){
-            return new ApiResult<>(ApiResult.FAIL_RESULT,"文件参数不正确");
+        if (file == null) {
+            return new ApiResult<>(ApiResult.FAIL_RESULT, "文件参数不正确");
         }
 
         PublicVoice publicVoice = new PublicVoice();
         publicVoice.setVoiceName(voiceName);
         publicVoice.setId(id);
-        if(description != null){
+        if (description != null) {
             publicVoice.setDescription(description);
         }
         publicVoice.setCreateTime(publicVoice1.getCreateTime());
@@ -223,12 +223,12 @@ public class PublicVoiceServiceImp extends BaseService<PublicVoice> implements C
 
     @Override
     public ApiResult<PublicVoice> updatePublicVoice(File file, PublicVoice publicVoice) {
-        if (publicVoice.getId() == null || publicVoice.getId() <= 0){
-            return new ApiResult<>(ApiResult.FAIL_RESULT,"参数[id]不正确");
+        if (publicVoice.getId() == null || publicVoice.getId() <= 0) {
+            return new ApiResult<>(ApiResult.FAIL_RESULT, "参数[id]不正确");
         }
         PublicVoice publicVoice1 = selectByPrimaryKey(publicVoice.getId());
-        if(publicVoice1 == null){
-            return new ApiResult<>(ApiResult.FAIL_RESULT,"参数[id]不存在");
+        if (publicVoice1 == null) {
+            return new ApiResult<>(ApiResult.FAIL_RESULT, "参数[id]不存在");
         }
 
         if (isUseInMoh(publicVoice1.getId())) {
@@ -264,7 +264,7 @@ public class PublicVoiceServiceImp extends BaseService<PublicVoice> implements C
                 logger.error("PublicVoiceServiceImp.updatePublicVoice error, " + publicVoice1 + ", count=" + count);
                 return new ApiResult<>(ApiResult.FAIL_RESULT, "更新失败");
             } else {
-                System.out.print("------------"+oldPath);
+                System.out.print("------------" + oldPath);
                 VoiceFile.deletePublicVoice(oldPath);
                 return new ApiResult<>(publicVoice1);
             }
@@ -303,8 +303,8 @@ public class PublicVoiceServiceImp extends BaseService<PublicVoice> implements C
 
     private boolean isUseInMoh(Integer voiceId) {
         PublicMoh publicMoh = publicMohMapper.selectByPrimaryKey(voiceId);
-        if(publicMoh != null){
-            return  true;
+        if (publicMoh != null) {
+            return true;
         }
 
         return false;
@@ -322,9 +322,9 @@ public class PublicVoiceServiceImp extends BaseService<PublicVoice> implements C
         List<EnterpriseIvr> list = enterpriseIvrMapper.selectByCondition(condition);
         if (list != null && list.size() > 0) {
             String path = publicVoice.getPath().substring(0, publicVoice.getPath().lastIndexOf("."));
-            System.out.println("------------------------------------------------------------------------------------"+path);
+            System.out.println("------------------------------------------------------------------------------------" + path);
             for (EnterpriseIvr enterpriseIvr : list) {
-                System.out.print("----"+enterpriseIvr.getId());
+                System.out.print("----" + enterpriseIvr.getId());
                 if (enterpriseIvr.getProperty().contains(path)) {
                     return true;
                 }

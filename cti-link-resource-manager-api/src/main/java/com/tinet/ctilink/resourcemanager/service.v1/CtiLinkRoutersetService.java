@@ -1,8 +1,7 @@
 package com.tinet.ctilink.resourcemanager.service.v1;
 
-import com.tinet.ctilink.resourcemanager.ApiResult;
-import com.tinet.ctilink.resourcemanager.model.Router;
-import com.tinet.ctilink.resourcemanager.response.RouterResponse;
+import com.tinet.ctilink.conf.ApiResult;
+import com.tinet.ctilink.conf.model.Routerset;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -15,25 +14,24 @@ import java.util.List;
  * Created by nope-J on 2016/5/30.
  */
 
-@Path("v1/router")
+@Path("v1/routerset")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public interface CtiLinkRouterService {
+public interface CtiLinkRoutersetService {
 
     @POST
     @Path("list")
-    ApiResult<List<RouterResponse>> listRouter(Router router);
+    ApiResult<List<Routerset>> listRouterSet();
 
     @POST
     @Path("create")
-    ApiResult<RouterResponse> createRouter(Router router);
+    ApiResult<Routerset> createRouterset(Routerset routerset);
 
     @POST
     @Path("update")
-    ApiResult<RouterResponse> updateRouter(Router router);
+    ApiResult<Routerset> updateRouterset(Routerset routerset);
 
     @POST
     @Path("delete")
-    ApiResult deleteRouter(Router router);
-
+    ApiResult deleteRouterset(Routerset routerset);
 }

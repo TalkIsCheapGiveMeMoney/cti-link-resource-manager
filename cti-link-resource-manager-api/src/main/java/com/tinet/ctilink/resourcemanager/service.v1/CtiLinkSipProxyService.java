@@ -1,7 +1,7 @@
 package com.tinet.ctilink.resourcemanager.service.v1;
 
-import com.tinet.ctilink.resourcemanager.ApiResult;
-import com.tinet.ctilink.resourcemanager.model.Routerset;
+import com.tinet.ctilink.conf.ApiResult;
+import com.tinet.ctilink.conf.model.SipProxy;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -14,24 +14,25 @@ import java.util.List;
  * Created by nope-J on 2016/5/30.
  */
 
-@Path("v1/routerset")
+@Path("v1/sipProxy")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public interface CtiLinkRoutersetService {
+public interface CtiLinkSipProxyService {
 
     @POST
     @Path("list")
-    ApiResult<List<Routerset>> listRouterSet();
+    ApiResult<List<SipProxy>> listSipProxy();
 
     @POST
     @Path("create")
-    ApiResult<Routerset> createRouterset(Routerset routerset);
+    ApiResult<SipProxy> createSipProxy(SipProxy sipProxy);
 
     @POST
     @Path("update")
-    ApiResult<Routerset> updateRouterset(Routerset routerset);
+    ApiResult<SipProxy> updateSipProxy(SipProxy sipProxy);
 
     @POST
     @Path("delete")
-    ApiResult deleteRouterset(Routerset routerset);
+    ApiResult deleteSipProxy(SipProxy sipProxy);
+
 }

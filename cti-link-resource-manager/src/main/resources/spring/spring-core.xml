@@ -45,9 +45,9 @@
     <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
           init-method="init" destroy-method="close">
         <!-- 基本属性 -->
-        <property name="url" value="${db.url}" />
-        <property name="username" value="${db.username}" />
-        <property name="password" value="${db.password}" />
+        <property name="url" value="${db.url.conf}" />
+        <property name="username" value="${db.username.conf}" />
+        <property name="password" value="${db.password.conf}" />
 
         <!-- 配置连接池的初始化大小、最小值、最大值 -->
         <property name="initialSize" value="${db.initialSize.conf}" />

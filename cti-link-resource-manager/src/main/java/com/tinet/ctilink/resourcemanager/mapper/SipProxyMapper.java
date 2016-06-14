@@ -1,7 +1,7 @@
 package com.tinet.ctilink.resourcemanager.mapper;
 
 import com.tinet.ctilink.mapper.BaseMapper;
-import com.tinet.ctilink.resourcemanager.model.SipProxy;
+import com.tinet.ctilink.conf.model.SipProxy;
 
 /**
  * @author fengwei //

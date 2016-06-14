@@ -1,6 +1,6 @@
 package com.tinet.ctilink.resourcemanager.mapper;
 
-import com.tinet.ctilink.resourcemanager.model.Routerset;
+import com.tinet.ctilink.conf.model.Routerset;
 import com.tinet.ctilink.mapper.BaseMapper;
 
 /**

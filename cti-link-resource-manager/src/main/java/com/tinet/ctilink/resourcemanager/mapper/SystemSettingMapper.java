@@ -1,6 +1,6 @@
 package com.tinet.ctilink.resourcemanager.mapper;
 
-import com.tinet.ctilink.resourcemanager.model.SystemSetting;
+import com.tinet.ctilink.conf.model.SystemSetting;
 import com.tinet.ctilink.mapper.BaseMapper;
 
 /**

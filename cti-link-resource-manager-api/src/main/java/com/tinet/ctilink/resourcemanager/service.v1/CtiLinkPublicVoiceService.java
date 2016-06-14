@@ -1,7 +1,7 @@
 package com.tinet.ctilink.resourcemanager.service.v1;
 
-import com.tinet.ctilink.resourcemanager.ApiResult;
-import com.tinet.ctilink.resourcemanager.model.PublicVoice;
+import com.tinet.ctilink.conf.ApiResult;
+import com.tinet.ctilink.conf.model.PublicVoice;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 import javax.ws.rs.Consumes;

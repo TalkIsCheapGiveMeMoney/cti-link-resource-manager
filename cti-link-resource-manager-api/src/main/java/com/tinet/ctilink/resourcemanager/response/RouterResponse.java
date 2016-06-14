@@ -1,8 +1,8 @@
 package com.tinet.ctilink.resourcemanager.response;
 
-import com.tinet.ctilink.resourcemanager.model.Gateway;
-import com.tinet.ctilink.resourcemanager.model.Router;
-import com.tinet.ctilink.resourcemanager.model.Routerset;
+import com.tinet.ctilink.conf.model.Gateway;
+import com.tinet.ctilink.conf.model.Router;
+import com.tinet.ctilink.conf.model.Routerset;
 
 /**
  * Created by nope-J on 2016/6/7.
