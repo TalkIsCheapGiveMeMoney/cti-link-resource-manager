@@ -29,6 +29,6 @@ public class ApplicationStarter implements ApplicationListener<ContextRefreshedE
 
 
 		logger.info("cti-link-resource-manager启动成功");
-		System.out.println("cti-clink-resource-manager启动成功");
+		System.out.println("cti-link-resource-manager启动成功");
 	}
 }
