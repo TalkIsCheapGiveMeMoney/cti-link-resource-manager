@@ -60,12 +60,10 @@ public class PublicVoiceServiceImp extends BaseService<PublicVoice> implements C
 
         String voiceName = null;
         List<InputPart> inputParts = uploadForm.get("voiceName");
-        System.out.println("------------"+inputParts);
         if(inputParts != null){
             InputPart inputPart = inputParts.get(0);
             try{
                 voiceName = inputPart.getBodyAsString();
-                System.out.println("-------------------"+voiceName);
             }catch (IOException e){
                 logger.error("PublicVoiceServiceImp.createPublicVoice error", e);
             }
@@ -80,7 +78,6 @@ public class PublicVoiceServiceImp extends BaseService<PublicVoice> implements C
             InputPart inputPart = inputParts.get(0);
             try{
                 description = inputPart.getBodyAsString();
-                System.out.println("----------------"+description);
             }catch(IOException e){
                 logger.error("PublicVoiceServiceImp.createPublicVoice error", e);
             }
@@ -93,7 +90,6 @@ public class PublicVoiceServiceImp extends BaseService<PublicVoice> implements C
             try{
                 MultivaluedMap<String, String> header = inputPart.getHeaders();
                 file = inputPart.getBody(File.class, null);
-                System.out.println("-----------"+file.getName()+"--"+file.getAbsolutePath());
             }catch (IOException e){
                 logger.error("PublicVoiceServiceImp.createPublicVoice error", e);
             }
@@ -132,17 +128,13 @@ public class PublicVoiceServiceImp extends BaseService<PublicVoice> implements C
             String srcFile = timestamp + "old.mav";
             System.out.println(file.getName());
             String destFile = timestamp + ".wav";
-            System.out.println(srcFile+"-------------");
-            System.out.println(destFile+"-----------------");
 
             if(VoiceFile.mkDir(uploadPath)){
-                System.out.println("success---------------------------------------");
                 FileUtils.moveFile(file, srcFile, uploadPath);
-                success = true;//VoiceFile.transferPublicVoice(srcFile,destFile);
+                success = VoiceFile.transferPublicVoice(srcFile,destFile);
             }
 
-            //publicVoice.setPath(destFile);
-            publicVoice.setPath(srcFile);
+            publicVoice.setPath(destFile);
             publicVoice.setDescription(SqlUtil.escapeSql(publicVoice.getDescription()));
         }
 
@@ -150,12 +142,12 @@ public class PublicVoiceServiceImp extends BaseService<PublicVoice> implements C
             int count = insertSelective(publicVoice);
             if(count != 1){
                 logger.error("PublicVoiceServiceImp.createPublicVoice error, " + publicVoice + ", count = " + count);
-                return new ApiResult<>(ApiResult.FAIL_RESULT,"新增失败++++++++++");
+                return new ApiResult<>(ApiResult.FAIL_RESULT,"新增失败");
             }else{
                 return new ApiResult<>(publicVoice);
             }
         }else{
-            return new ApiResult<>(ApiResult.FAIL_RESULT,"新增失败-----------");
+            return new ApiResult<>(ApiResult.FAIL_RESULT,"新增失败");
         }
     }
 
@@ -221,6 +213,7 @@ public class PublicVoiceServiceImp extends BaseService<PublicVoice> implements C
 
         PublicVoice publicVoice = new PublicVoice();
         publicVoice.setVoiceName(voiceName);
+        publicVoice.setId(id);
         if(description != null){
             publicVoice.setDescription(description);
         }
@@ -259,12 +252,11 @@ public class PublicVoiceServiceImp extends BaseService<PublicVoice> implements C
         boolean success = false;
         if (VoiceFile.mkDir(uploadPath)) {
             FileUtils.moveFile(file, srcFile, uploadPath);
-            success = true;//VoiceFile.transferPublicVoice(srcFile, destFile);
+            success = VoiceFile.transferPublicVoice(srcFile, destFile);
         }
 
         if (success) {
-            //publicVoice1.setPath(destFile);
-            publicVoice1.setPath(srcFile);
+            publicVoice1.setPath(destFile);
             publicVoice1.setDescription(SqlUtil.escapeSql(publicVoice.getDescription()));
 
             int count = updateByPrimaryKeySelective(publicVoice1);
@@ -272,7 +264,8 @@ public class PublicVoiceServiceImp extends BaseService<PublicVoice> implements C
                 logger.error("PublicVoiceServiceImp.updatePublicVoice error, " + publicVoice1 + ", count=" + count);
                 return new ApiResult<>(ApiResult.FAIL_RESULT, "更新失败");
             } else {
-                VoiceFile.deleteEnterpriseVoice(oldPath);
+                System.out.print("------------"+oldPath);
+                VoiceFile.deletePublicVoice(oldPath);
                 return new ApiResult<>(publicVoice1);
             }
         } else {
@@ -297,7 +290,7 @@ public class PublicVoiceServiceImp extends BaseService<PublicVoice> implements C
         if (isUseInIvr(publicVoice)) {
             return new ApiResult<>(ApiResult.FAIL_RESULT, "在语音导航中使用，不能删除");
         }
-        boolean success = VoiceFile.deleteEnterpriseVoice(publicVoice1.getPath());
+        boolean success = VoiceFile.deletePublicVoice(publicVoice1.getPath());
 
         int count = deleteByPrimaryKey(publicVoice.getId());
 
@@ -329,7 +322,9 @@ public class PublicVoiceServiceImp extends BaseService<PublicVoice> implements C
         List<EnterpriseIvr> list = enterpriseIvrMapper.selectByCondition(condition);
         if (list != null && list.size() > 0) {
             String path = publicVoice.getPath().substring(0, publicVoice.getPath().lastIndexOf("."));
+            System.out.println("------------------------------------------------------------------------------------"+path);
             for (EnterpriseIvr enterpriseIvr : list) {
+                System.out.print("----"+enterpriseIvr.getId());
                 if (enterpriseIvr.getProperty().contains(path)) {
                     return true;
                 }
