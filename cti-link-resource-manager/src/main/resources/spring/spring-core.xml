@@ -104,7 +104,7 @@
     </bean>
 
     <bean class="tk.mybatis.spring.mapper.MapperScannerConfigurer">
-        <property name="basePackage" value="com.tinet.ctilink.conf.mapper" />
+        <property name="basePackage" value="com.tinet.ctilink.resourcemanager.mapper" />
         <property name="markerInterface" value="com.tinet.ctilink.mapper.BaseMapper" />
         <property name="properties">
             <value>
@@ -124,7 +124,7 @@
 
     <!-- 声明式事务 以AspectJ方式 定义事物AOP -->
     <aop:config>
-        <aop:advisor pointcut="execution(* com.tinet.ctilink.rm..*Service.*(..))" advice-ref="txAdvice"/>
+        <aop:advisor pointcut="execution(* com.tinet.ctilink.resourcemanager..*Service.*(..))" advice-ref="txAdvice"/>
     </aop:config>
 
     <!-- 基本事务定义, 使用transactionManager作事务管理 -->
